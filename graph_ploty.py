@@ -5,6 +5,7 @@ from fredapi import Fred
 from bokeh.plotting import figure, show, output_file
 from bokeh.io import output_notebook
 from bokeh.models import ColumnDataSource
+from plotly.io import write_html
 
 
 def graph_ploty():
@@ -32,10 +33,10 @@ def graph_ploty():
             rangeselector=dict(
                 buttons=list(
                     [
-                        dict(count=1, label="1m", step="month", stepmode="backward"),
-                        dict(count=6, label="6m", step="month", stepmode="backward"),
-                        dict(count=1, label="YTD", step="year", stepmode="todate"),
                         dict(count=1, label="1y", step="year", stepmode="backward"),
+                        dict(count=2, label="2y", step="year", stepmode="backward"),
+                        dict(count=5, label="5Y", step="year", stepmode="todate"),
+                        dict(count=10, label="10y", step="year", stepmode="backward"),
                         dict(step="all"),
                     ]
                 )
@@ -44,6 +45,9 @@ def graph_ploty():
             type="date",
         ),
     )
+
+    # Save the plot as an HTML file
+    write_html(fig, "net_equity_issues_ploty.html")
 
     # Show the plot
     fig.show()
@@ -89,5 +93,5 @@ def graph_bokeh(series_id):
 
 if __name__ == "__main__":
     series_id = "NCBCEBQ027S"
-    graph_bokeh(series_id)
-    # graph_ploty()
+    # graph_bokeh(series_id)
+    graph_ploty()
