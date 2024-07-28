@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 
-def graph_ploty():
+def graph_ploty_simple():
     fred = Fred(api_key=os.environ["FRED_API_KEY"])
     data = fred.get_series("NCBCEBQ027S")
 
@@ -110,6 +110,19 @@ def complex_graph_ploty(series_dic):
         z1df["Series_name"].str.contains("LM893064105" + ".Q", na=False)
     ]
 
+    pivoted_total_equity = total_equity.pivot(
+        index="Date", columns="Series_name", values="Obs_value"
+    )
+
+    # Select only the 'LM893064105.Q' column
+    pivoted_total_equity = pivoted_total_equity[["LM893064105.Q"]]
+
+    # Reset the index to have 'Date' as a column
+    pivoted_total_equity.reset_index(inplace=True)
+
+    # Reset the index again to add a simple integer index
+    pivoted_total_equity.reset_index(drop=True, inplace=True)
+
     series_names = [x + ".Q" for x in list(series_dic.keys())]
     equity_holder = z1df[z1df["Series_name"].isin(series_names)]
 
@@ -131,21 +144,23 @@ def complex_graph_ploty(series_dic):
     # Rename the index to 'index'
     pivoted_equity_holder.rename_axis("index", inplace=True)
 
+    # Replace -9999.0 with NaN
+    pivoted_equity_holder.replace(-9999.0, np.nan, inplace=True)
+    pivoted_total_equity.replace(-9999.0, np.nan, inplace=True)
+
     for series in series_names:
         pivoted_equity_holder[series] = (
-            pivoted_equity_holder[series] / total_equity["LM893064105.Q"] * 100
+            pivoted_equity_holder[series] / pivoted_total_equity["LM893064105.Q"] * 100
         )
 
     # Assuming both DataFrames have a 'Date' column
-    merged_df = pivoted_equity_holder.merge(total_equity, on="Date")
+    merged_df = pivoted_equity_holder.merge(pivoted_total_equity, on="Date")
 
-    # Replace -9999.0 with NaN in the merged DataFrame
-    merged_df.replace(-9999.0, np.nan, inplace=True)
+    # Ensure 'Date' column is in datetime format
+    merged_df["Date"] = pd.to_datetime(merged_df["Date"])
 
-    # Melt the DataFrame to long format for Plotly
-    melted_df = merged_df.melt(
-        id_vars=["Date"], value_vars=series_names, var_name="Series", value_name="Value"
-    )
+    # Filter rows where the year in 'Date' is greater than 1952
+    merged_df = merged_df[merged_df["Date"].dt.year > 1952]
 
     # Create a subplot with secondary y-axis
     fig = make_subplots(specs=[[{"secondary_y": True}]])
@@ -175,12 +190,34 @@ def complex_graph_ploty(series_dic):
         secondary_y=True,
     )
 
-    # Update layout
+    # Update layout to include zoom functionality
     fig.update_layout(
-        title="Area Plot of Series with Secondary Y-Axis for LM893064105.Q",
+        title={
+            "text": "Quarterly qquity holder shares and equity",
+            "y": 0.9,
+            "x": 0.5,
+            "xanchor": "center",
+            "yanchor": "top",
+            "font": {"size": 20, "family": "Arial", "color": "black"},
+        },
         xaxis_title="Date",
         yaxis_title="Series Values",
         yaxis2_title="LM893064105.Q",
+        xaxis=dict(
+            rangeselector=dict(
+                buttons=list(
+                    [
+                        dict(count=1, label="1y", step="year", stepmode="backward"),
+                        dict(count=2, label="2y", step="year", stepmode="backward"),
+                        dict(count=5, label="5y", step="year", stepmode="todate"),
+                        dict(count=10, label="10y", step="year", stepmode="backward"),
+                        dict(step="all"),
+                    ]
+                )
+            ),
+            rangeslider=dict(visible=True),
+            type="date",
+        ),
     )
 
     # Show the plot
@@ -190,7 +227,7 @@ def complex_graph_ploty(series_dic):
 if __name__ == "__main__":
     series_id = "NCBCEBQ027S"
     # graph_bokeh(series_id)
-    # graph_ploty()
+    # graph_ploty_simple()
 
     # Create the dictionary
     series_dic = {
