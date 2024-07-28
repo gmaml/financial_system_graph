@@ -28,7 +28,7 @@ def graph_ploty():
     # Center the title
     # Center the title
     fig.update_layout(
-        title={"x": 0.5},
+        title={"text": "<b>Net equity issues</b>", "x": 0.5},
         xaxis=dict(
             rangeselector=dict(
                 buttons=list(
@@ -41,7 +41,13 @@ def graph_ploty():
                     ]
                 )
             ),
-            rangeslider=dict(visible=True),
+            rangeslider=dict(
+                visible=True,
+                bgcolor="lightgray",  # Background color of the range slider
+                bordercolor="black",  # Border color of the range slider
+                borderwidth=2,  # Border width of the range slider
+                thickness=0.1,  # Thickness of the range slider
+            ),
             type="date",
         ),
     )
