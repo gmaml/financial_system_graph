@@ -100,100 +100,130 @@ def graph_bokeh(series_id):
     show(p)
 
 
+def adjust_annotations_within_bounds(annotations, x_min, x_max):
+    """Adjust annotations to be within the x-axis bounds."""
+    adjusted_annotations = []
+    for annotation in annotations:
+        if annotation["x"] < x_min:
+            annotation["x"] = x_min
+        elif annotation["x"] > x_max:
+            annotation["x"] = x_max
+        adjusted_annotations.append(annotation)
+    return adjusted_annotations
+
+
 def complex_graph_ploty(series_dic):
-    # using ploty to plot figure 2.7
     # Load the Parquet file into a pandas DataFrame
     z1df = pd.read_parquet("z1df.parquet")
 
     equity_name = "LM893064105"
-    total_equity = z1df[
-        z1df["Series_name"].str.contains("LM893064105" + ".Q", na=False)
-    ]
+    total_equity = z1df[z1df["Series_name"].str.contains(equity_name + ".Q", na=False)]
 
     pivoted_total_equity = total_equity.pivot(
         index="Date", columns="Series_name", values="Obs_value"
     )
-
-    # Select only the 'LM893064105.Q' column
     pivoted_total_equity = pivoted_total_equity[["LM893064105.Q"]]
-
-    # Reset the index to have 'Date' as a column
     pivoted_total_equity.reset_index(inplace=True)
-
-    # Reset the index again to add a simple integer index
     pivoted_total_equity.reset_index(drop=True, inplace=True)
 
     series_names = [x + ".Q" for x in list(series_dic.keys())]
     equity_holder = z1df[z1df["Series_name"].isin(series_names)]
 
-    # Assuming 'Date' is a column in your DataFrame
-    # Pivot the DataFrame
     pivoted_equity_holder = equity_holder.pivot(
         index="Date", columns="Series_name", values="Obs_value"
     )
-
-    # Select only the 'LM893064105.Q' column
     pivoted_equity_holder = pivoted_equity_holder[series_names]
-
-    # Reset the index to drop the current index and convert it to columns
     pivoted_equity_holder.reset_index(inplace=True)
 
-    # Reset the index again to add a simple integer index
-    pivoted_equity_holder.reset_index(drop=True, inplace=True)
-
-    # Rename the index to 'index'
-    pivoted_equity_holder.rename_axis("index", inplace=True)
-
-    # Replace -9999.0 with NaN
-    pivoted_equity_holder.replace(-9999.0, np.nan, inplace=True)
-    pivoted_total_equity.replace(-9999.0, np.nan, inplace=True)
-
-    for series in series_names:
-        pivoted_equity_holder[series] = (
-            pivoted_equity_holder[series] / pivoted_total_equity["LM893064105.Q"] * 100
-        )
-
-    # Assuming both DataFrames have a 'Date' column
     merged_df = pivoted_equity_holder.merge(pivoted_total_equity, on="Date")
-
-    # Ensure 'Date' column is in datetime format
+    merged_df.replace(-9999.0, pd.NA, inplace=True)
     merged_df["Date"] = pd.to_datetime(merged_df["Date"])
+    filtered_df = merged_df[merged_df["Date"].dt.year > 1952]
 
-    # Filter rows where the year in 'Date' is greater than 1952
-    merged_df = merged_df[merged_df["Date"].dt.year > 1952]
-
-    # Create a subplot with secondary y-axis
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
-    # Add area traces for each series in series_names
-    for series in series_names:
+    # Define grayscale colors
+    grayscale_colors = ["#000000", "#333333", "#666666", "#999999", "#CCCCCC"]
+
+    # Add area traces for each series in series_names using grayscale colors
+    for i, series in enumerate(series_names):
         fig.add_trace(
             go.Scatter(
-                x=merged_df["Date"],
-                y=merged_df[series],
+                x=filtered_df["Date"],
+                y=filtered_df[series],
                 mode="lines",
                 stackgroup="one",
                 name=series,
+                line=dict(color=grayscale_colors[i % len(grayscale_colors)]),
             ),
             secondary_y=False,
         )
 
-    # Add a line trace for 'LM893064105.Q' on the secondary y-axis
+    # Add a line trace for 'LM893064105.Q' on the secondary y-axis using a grayscale color
     fig.add_trace(
         go.Scatter(
-            x=merged_df["Date"],
-            y=merged_df["LM893064105.Q"],
+            x=filtered_df["Date"],
+            y=filtered_df["LM893064105.Q"],
             mode="lines",
             name="LM893064105.Q",
-            line=dict(color="red"),
+            line=dict(color="#000000"),  # Black color for the secondary y-axis line
         ),
         secondary_y=True,
     )
 
-    # Update layout to include zoom functionality
+    # Add annotations to label the graph area
+    annotations = []
+    for i, series in enumerate(series_names):
+        if i == 0:
+            cum_y = filtered_df[series]
+        else:
+            cum_y += filtered_df[series]
+
+        # Find the index where the difference is the largest
+        max_index = filtered_df[series].idxmax()
+
+        # Ensure max_index is within bounds
+
+        if max_index >= len(filtered_df):
+            max_index = len(filtered_df) - 1
+
+        annotation_st = -20  #
+
+        max_x_index = max_index + annotation_st
+
+        if max_x_index < 0:
+            max_x_index = 0
+
+        annotations.append(
+            dict(
+                x=filtered_df["Date"].iloc[
+                    max_x_index
+                ],  # Position the annotation at the point with the most space
+                y=cum_y.iloc[max_index] - 0.5 * filtered_df[series].iloc[max_index],
+                text=series_dic[
+                    series[:-2]
+                ],  # Use the original series name without ".Q"
+                showarrow=False,
+                xanchor="left",
+                font=dict(color=grayscale_colors[i % len(grayscale_colors)]),
+            )
+        )
+
+    # Assuming x-axis data ranges from '2022-01-01' to '2024-12-31'
+    x_min = pd.to_datetime("1953-01-01")
+    x_max = pd.to_datetime("2024-12-31")
+
+    adjusted_annotations = adjust_annotations_within_bounds(annotations, x_min, x_max)
+
+    # Add adjusted annotations
+    for annotation in adjusted_annotations:
+        fig.add_annotation(
+            x=annotation["x"], y=annotation["y"], text=annotation["text"]
+        )
+
     fig.update_layout(
         title={
-            "text": "Quarterly qquity holder shares and equity",
+            "text": "Area Plot of Series with Secondary Y-Axis for LM893064105.Q",
             "y": 0.9,
             "x": 0.5,
             "xanchor": "center",
@@ -207,10 +237,10 @@ def complex_graph_ploty(series_dic):
             rangeselector=dict(
                 buttons=list(
                     [
+                        dict(count=1, label="1m", step="month", stepmode="backward"),
+                        dict(count=6, label="6m", step="month", stepmode="backward"),
                         dict(count=1, label="1y", step="year", stepmode="backward"),
-                        dict(count=2, label="2y", step="year", stepmode="backward"),
-                        dict(count=5, label="5y", step="year", stepmode="todate"),
-                        dict(count=10, label="10y", step="year", stepmode="backward"),
+                        dict(count=5, label="5y", step="year", stepmode="backward"),
                         dict(step="all"),
                     ]
                 )
@@ -218,9 +248,10 @@ def complex_graph_ploty(series_dic):
             rangeslider=dict(visible=True),
             type="date",
         ),
+        annotations=adjusted_annotations,
+        showlegend=False,
     )
 
-    # Show the plot
     fig.show()
 
 

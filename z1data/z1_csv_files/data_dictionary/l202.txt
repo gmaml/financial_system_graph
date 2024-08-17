@@ -1,0 +1,6 @@
+LM263191005.Q	Rest of the world; U.S. private deposits, including negotiable certificates of deposit; liability	Line 1	L.202 U.S. Deposits in Foreign Countries	Millions of dollars; amounts outstanding end of period, market value, not seasonally adjusted
+LM153091003.Q	Households and nonprofit organizations; private foreign deposits; asset	Line 2	L.202 U.S. Deposits in Foreign Countries	Millions of dollars; amounts outstanding end of period, market value, not seasonally adjusted
+FL103091003.Q	Nonfinancial corporate business; private foreign deposits; asset	Line 3	L.202 U.S. Deposits in Foreign Countries	Millions of dollars; amounts outstanding end of period, not seasonally adjusted
+FL633091003.Q	Money market funds; private foreign deposits; asset	Line 4	L.202 U.S. Deposits in Foreign Countries	Millions of dollars; amounts outstanding end of period, not seasonally adjusted
+FL733091003.Q	Holding companies; private foreign deposits at affiliates; asset	Line 5	L.202 U.S. Deposits in Foreign Countries	Millions of dollars; amounts outstanding end of period, not seasonally adjusted
+FL903091005.Q	Instrument discrepancies; private foreign deposits	Line 6	L.202 U.S. Deposits in Foreign Countries	Millions of dollars; amounts outstanding end of period, not seasonally adjusted

@@ -1,0 +1,6 @@
+FU263191005.Q	Rest of the world; U.S. private deposits, including negotiable certificates of deposit; liability	Line 1	F.202 U.S. Deposits in Foreign Countries	Millions of dollars; transactions, not seasonally adjusted
+FU153091003.Q	Households and nonprofit organizations; private foreign deposits; asset	Line 2	F.202 U.S. Deposits in Foreign Countries	Millions of dollars; transactions, not seasonally adjusted
+FU103091003.Q	Nonfinancial corporate business; private foreign deposits; asset	Line 3	F.202 U.S. Deposits in Foreign Countries	Millions of dollars; transactions, not seasonally adjusted
+FU633091003.Q	Money market funds; private foreign deposits; asset	Line 4	F.202 U.S. Deposits in Foreign Countries	Millions of dollars; transactions, not seasonally adjusted
+FU733091003.Q	Holding companies; private foreign deposits at affiliates; asset	Line 5	F.202 U.S. Deposits in Foreign Countries	Millions of dollars; transactions, not seasonally adjusted
+FU903091005.Q	Instrument discrepancies; private foreign deposits	Line 6	F.202 U.S. Deposits in Foreign Countries	Millions of dollars; transactions, not seasonally adjusted
