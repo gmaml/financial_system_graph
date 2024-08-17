@@ -1,5 +1,0 @@
-FU713014003.Q	Monetary authority; SDR certificates issued by federal government; asset	Line 1	F.201 SDR Certificates and Treasury Currency	Millions of dollars; transactions, not seasonally adjusted
-FU713014003.Q	Monetary authority; SDR certificates issued by federal government; asset	Line 2	F.201 SDR Certificates and Treasury Currency	Millions of dollars; transactions, not seasonally adjusted
-FU313112003.Q	Federal government; Treasury currency; liability	Line 3	F.201 SDR Certificates and Treasury Currency	Millions of dollars; transactions, not seasonally adjusted
-FU713012003.Q	Monetary authority; Treasury currency; asset	Line 4	F.201 SDR Certificates and Treasury Currency	Millions of dollars; transactions, not seasonally adjusted
-FU903012005.Q	Instrument discrepancies; Treasury currency (seigniorage)	Line 5	F.201 SDR Certificates and Treasury Currency	Millions of dollars; transactions, not seasonally adjusted
