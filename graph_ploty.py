@@ -135,6 +135,15 @@ def complex_graph_ploty(series_dic):
     pivoted_equity_holder = pivoted_equity_holder[series_names]
     pivoted_equity_holder.reset_index(inplace=True)
 
+    # Calculate the total for each date
+    pivoted_equity_holder["Total"] = pivoted_equity_holder[series_names].sum(axis=1)
+
+    # Calculate the percentage of each series relative to the total
+    for series in series_names:
+        pivoted_equity_holder[series] = (
+            pivoted_equity_holder[series] / pivoted_equity_holder["Total"]
+        ) * 100
+
     merged_df = pivoted_equity_holder.merge(pivoted_total_equity, on="Date")
     merged_df.replace(-9999.0, pd.NA, inplace=True)
     merged_df["Date"] = pd.to_datetime(merged_df["Date"])
